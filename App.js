@@ -15,7 +15,11 @@ import GoalItem from "./components/GoalItem";
 import GoalInput from "./components/GoalInput";
 
 export default function App() {
+  // 2nd function changes first state
   const [courseGoals, setCourseGoals] = useState([]);
+  const [isAddMode, setIsAddMode] = useState(false);
+  console.log("New render cycle: ");
+  console.log(courseGoals);
 
   // input is string
   /*
@@ -33,6 +37,24 @@ export default function App() {
       ...currentGoals,
       { id: uuid(), value: goalTitle }
     ]);
+    setIsAddMode(false);
+  };
+
+  // resets the mode to false
+  const cancelGoalHandler = () => {
+    setIsAddMode(false);
+  };
+
+  // filter() builds a new array based on old array
+  const removeGoalHandler = goalId => {
+    console.log("TO BE DELETED: " + goalId);
+    console.log(courseGoals);
+
+    setCourseGoals(currentGoals => {
+      // check all array, if id does match, then we delete it
+      // this function runs on every element its calling
+      return currentGoals.filter(goal => goal.id !== goalId);
+    });
   };
 
   return (
@@ -48,11 +70,14 @@ export default function App() {
     // FlatList replaces ScrollView
     //
     <View style={styles.screen}>
+      <Button title="Add new Goal" onPress={() => setIsAddMode(true)} />
       <GoalInput
+        isVisible={isAddMode}
         // COMPONENT CALL
-        // makes up a name and gets passed to GoalInput.js
+        // makes up a prop name and pass a function and gets passed to GoalInput.js
         // so when called, it calls addGoalHandler func
         onAddGoal={addGoalHandler}
+        onCancel={cancelGoalHandler}
       />
       <FlatList //3 parameters: keyExt, data and renderItem
         // extracts the key for id or uid use
@@ -62,7 +87,13 @@ export default function App() {
         // itemData is an obj that gets passed in
 
         // COMPONENT CALL
-        renderItem={itemData => <GoalItem title={itemData.item.value} />}
+        renderItem={itemData => (
+          <GoalItem
+            id={itemData.item.id}
+            onDelete={removeGoalHandler}
+            title={itemData.item.value}
+          />
+        )}
         // access the list item by calling value which holds data
       />
     </View>
